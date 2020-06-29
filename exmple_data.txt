@@ -1,0 +1,138 @@
+﻿{
+   "hand_number": "123456789012",
+   "blinds": "$0.01/$0.02 USD",
+   "date": "2020/06/27",
+   "time": "22:11:48",
+   "table_name": "cooltable",
+   "table_max_size": "6",
+   "button_pos": "2",
+   "players": {
+      "alice": {
+         "seat_num": "1",
+         "chip_stack": 1.91,
+         "into_pot": 0.07,
+         "winnings": 0
+      },
+      "bob": {
+         "seat_num": "2",
+         "chip_stack": 1.09,
+         "into_pot": 0,
+         "winnings": 0
+      },
+      "cram": {
+         "seat_num": "3",
+         "chip_stack": 1.98,
+         "into_pot": 0.01,
+         "winnings": 0
+      },
+      "david": {
+         "seat_num": "4",
+         "chip_stack": 2.45,
+         "into_pot": 0.07,
+         "winnings": 0.14
+      },
+      "eve": {
+         "seat_num": "5",
+         "chip_stack": 2,
+         "into_pot": 0,
+         "winnings": 0
+      },
+      "fred": {
+         "seat_num": "6",
+         "chip_stack": 1.46,
+         "into_pot": 0,
+         "winnings": 0
+      }
+   },
+   "blinds_posted": [
+      {
+         "player": "cram",
+         "blind_type": "small",
+         "blind_size": 0.01
+      },
+      {
+         "player": "david",
+         "blind_type": "big",
+         "blind_size": 0.02
+      }
+   ],
+   "my_cards": "9c 7s",
+   "pre_flop_action": [
+      {
+         "player": "eve",
+         "action": "folds"
+      },
+      {
+         "player": "fred",
+         "action": "folds"
+      },
+      {
+         "player": "alice",
+         "action": "raises",
+         "amount": 0.04,
+         "raised_by": 0.02
+      },
+      {
+         "player": "bob",
+         "action": "folds"
+      },
+      {
+         "player": "cram",
+         "action": "folds"
+      },
+      {
+         "player": "david",
+         "action": "calls",
+         "amount": 0.02
+      }
+   ],
+   "flop_action": [
+      {
+         "player": "david",
+         "action": "checks"
+      },
+      {
+         "player": "alice",
+         "action": "bets",
+         "amount": 0.03
+      },
+      {
+         "player": "david",
+         "action": "calls",
+         "amount": 0.03
+      }
+   ],
+   "turn_action": [
+      {
+         "player": "david",
+         "action": "checks"
+      },
+      {
+         "player": "alice",
+         "action": "checks"
+      }
+   ],
+   "river_action": [
+      {
+         "player": "david",
+         "action": "bets",
+         "amount": 0.05
+      },
+      {
+         "player": "alice",
+         "action": "folds"
+      },
+      {
+         "player": "david",
+         "action": "bet_returned",
+         "amount": 0.05
+      },
+      {
+         "player": "david",
+         "action": "collects_pot",
+         "amount": 0.14
+      }
+   ],
+   "pot": "0.15",
+   "rake": null
+}

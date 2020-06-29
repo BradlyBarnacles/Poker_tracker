@@ -13,8 +13,8 @@ def Parse_bet(line):
                       'action': 'bet_returned',
                       'amount': Decimal(match.group(1))}
         else:
-            print('non bet line:' + line)
             action = None
+            
     elif match.group(2) == 'folds':
         action = {"player": match.group(1),
                   "action": "folds"}
@@ -61,8 +61,8 @@ def Parse_betting_round(file,contributions):
                             'amount': Decimal(match.group(2))})
             while '*** SUMMARY ***' not in line:
                 line = file.readline()
-            return actions
-    return actions
+            return actions, True
+    return actions, False
 
 def Parse_hands(path):
     with open(path, "r", encoding='utf-8-sig') as file:
@@ -93,13 +93,11 @@ def Parse_hands(path):
                 hand["players"][match.group(2)] = {"seat_num": match.group(1),
                                                    "chip_stack": Decimal(match.group(3)),
                                                    "into_pot": 0,
-                                                   "winnings": 0,
-                                                   "round_reached": 0}
+                                                   "winnings": 0}
                 contributions[match.group(2)] = 0
 
                 line = file.readline()
             hand["blinds_posted"] = []
-            hand["round_reached"] = 0
             
             while line != '*** HOLE CARDS ***\n':
                 match = re.match(blinds_pattern, line)
@@ -111,78 +109,44 @@ def Parse_hands(path):
                 line = file.readline()
             hand["my_cards"] = re.match(delt_pattern, file.readline()).group(1)
 
-            hand["pre_flop_action"] = Parse_betting_round(file, contributions)
-            for player, amount in contributions.items():
-                hand["players"][player]["into_pot"] += amount
-                contributions[player] = 0 
-            if hand["pre_flop_action"] != [] and hand["pre_flop_action"][-1]['action'] == 'collects_pot':
 
-                hand["players"][hand["pre_flop_action"][-1]['player']]["winnings"] += hand["pre_flop_action"][-1]['amount']
-                Parse_summary(hand, file)
-                yield hand
-                continue
-
-            hand["round_reached"] = 1
-            hand["flop_action"] = Parse_betting_round(file, contributions)
-            for player, amount in contributions.items():
-                hand["players"][player]["into_pot"] += amount
-                contributions[player] = 0 
-            if hand["flop_action"] != [] and hand["flop_action"][-1]['action'] == 'collects_pot':
-                hand["players"][hand["flop_action"][-1]['player']]["winnings"]+= hand["flop_action"][-1]['amount']
-                Parse_summary(hand, file)
-                yield hand
-                continue
-
-            hand["round_reached"] = 2   
-            hand["turn_action"] = Parse_betting_round(file, contributions)
-            for player, amount in contributions.items():
-                hand["players"][player]["into_pot"] += amount
-                contributions[player] = 0 
-            if hand["turn_action"] != [] and hand["turn_action"][-1]['action'] == 'collects_pot':
-                hand["players"][hand["turn_action"][-1]['player']]["winnings"]+= hand["turn_action"][-1]['amount']
-                Parse_summary(hand, file)
-                yield hand
-                continue
-
-            hand["round_reached"] = 3
-            hand["river_action"] = Parse_betting_round(file, contributions)
-            for player, amount in contributions.items():
-                hand["players"][player]["into_pot"] += amount
-                contributions[player] = 0 
-            if hand["river_action"] != [] and hand["river_action"][-1]['action'] == 'collects_pot':
-                hand["players"][hand["river_action"][-1]['player']]["winnings"]+= hand["river_action"][-1]['amount']
-                Parse_summary(hand, file)
-                yield hand
-                continue
-
-            hand["round_reached"] = 4
-            line = file.readline()
-            hand["showdown_action"] = []
-            while '*** SUMMARY ***' not in line:
-                if re.match(mucks_pattern, line) != None:
-                    hand["showdown_action"].append({'player': re.match(mucks_pattern, line).group(1),
-                                                    'action': 'mucks'})
-                elif re.match(shows_pattern, line) != None:
-                    hand["showdown_action"].append({'player': re.match(shows_pattern, line).group(1),
-                                                    'action': 'shows',
-                                                    'cards': re.match(shows_pattern, line).group(2)})
-                elif re.match(collect_pot_pattern, line) != None:
-                    match = re.match(collect_pot_pattern, line)
-                    hand["showdown_action"].append({'player': match.group(1),
-                                                    'action': 'collects_pot',
-                                                    'amount': Decimal(match.group(2))})
-                    hand["players"][match.group(1)]["winnings"]+= Decimal(match.group(2))
-                    
-                elif re.match(cashout_pattern, line) != None:
-                    match = re.match(cashout_pattern, line)
-                    hand["showdown_action"].append({'player': match.group(1),
-                                                    'action': 'collects_pot',
-                                                    'amount': Decimal(match.group(2))})
-                    hand["players"][match.group(1)]["winnings"]+= Decimal(match.group(2))
-                    
-                
+            for betting_round in betting_rounds:
+                hand[betting_round + "_action"], Done  = Parse_betting_round(file, contributions)
+                for player, amount in contributions.items():
+                    hand["players"][player]["into_pot"] += amount
+                    contributions[player] = 0
+                if Done == True:
+                    hand["players"][hand[betting_round + "_action"][-1]['player']]["winnings"]+= hand[betting_round+"_action"][-1]['amount']
+                    Parse_summary(hand, file)
+                    break
+            else:
                 line = file.readline()
-            Parse_summary(hand, file) 
+                hand["showdown_action"] = []
+                while '*** SUMMARY ***' not in line:
+                    if re.match(mucks_pattern, line) != None:
+                        hand["showdown_action"].append({'player': re.match(mucks_pattern, line).group(1),
+                                                        'action': 'mucks'})
+                    elif re.match(shows_pattern, line) != None:
+                        hand["showdown_action"].append({'player': re.match(shows_pattern, line).group(1),
+                                                        'action': 'shows',
+                                                        'cards': re.match(shows_pattern, line).group(2)})
+                    elif re.match(collect_pot_pattern, line) != None:
+                        match = re.match(collect_pot_pattern, line)
+                        hand["showdown_action"].append({'player': match.group(1),
+                                                        'action': 'collects_pot',
+                                                        'amount': Decimal(match.group(2))})
+                        hand["players"][match.group(1)]["winnings"]+= Decimal(match.group(2))
+                        
+                    elif re.match(cashout_pattern, line) != None:
+                        match = re.match(cashout_pattern, line)
+                        hand["showdown_action"].append({'player': match.group(1),
+                                                        'action': 'collects_pot',
+                                                        'amount': Decimal(match.group(2))})
+                        hand["players"][match.group(1)]["winnings"]+= Decimal(match.group(2))
+                        
+                    
+                    line = file.readline()
+                Parse_summary(hand, file) 
 
             yield hand
 
@@ -191,22 +155,29 @@ def Parse_summary(hand,file):
     match = re.match("Total pot \$(\d*(?:\.\d\d)?)( Main pot \d*. Side pot \d*.)? \| Rake \$(\d*(?:\.\d\d)?)" , line)
     hand["pot"] = match.group(1)
     hand["rake"] = match.group(2)
-    match = re.match("Board \[([AKQJTschd2-9 ]*)\]" , file.readline())
+    
+    line = file.readline()
+    match = re.match("Board \[([AKQJTschd2-9 ]*)\]" , line)
     while file.readline() != "\n":
         pass
     file.readline()
     file.readline()
     return
     
-    
 
-my_name = 'dazzle0'
+my_name = "dazzle0"
 
-money_pattern = '\$\d*(?:\.\d\d)?'
+money_pattern = '\$\d*(?:\.\d\d)?' ## regex pattern for dollar amounts in the form $x.yz or $x
 
+
+## regex patterns to parse the 2 header lines for each hand
 header_pattern1 = "PokerStars Hand #(\d*):  Hold'em No Limit \((\$\d*(?:\.\d\d)?/\$\d*(?:\.\d\d)? USD)\) - (\d{4}/\d{2}/\d{2}) (\d{2}:\d{2}:\d{2}) WET \[\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2} ET\]"
 header_pattern2 = "Table '([a-zA-Z\s]*)' (\d)-max Seat #(\d) is the button"
-seat_pattern = "Seat (\d): (.*) \(\$(\d*(?:\.\d\d)?) in chips\) "
+
+## regex for seat allocations, group 1: seat number, group 2: player name, group 3: chip stack
+seat_pattern = "Seat (\d): (.*) \(\$(\d*(?:\.\d\d)?) in chips\) "#
+
+
 blinds_pattern = "(.*): posts (big|small) blind \$(\d*(?:\.\d\d)?)"
 delt_pattern = 'Dealt to ' + my_name + ' \[([AKQJT2-9][schd] [AKQJT2-9][schd])\]'
 bet_pattern = '(.*): (folds|bets|calls|raises|checks)(.*)'
@@ -217,7 +188,7 @@ collect_pot_pattern = '(.*) collected \$(\d*(?:\.\d\d)?) from pot'
 limit_pattern = '\*\*\* (FLOP|TURN|RIVER|SHOW DOWN) \*\*\*'
 cashout_pattern = '(.*) cashed out the hand for \$(\d*(?:\.\d\d)?) \| Cash Out Fee \$(\d*(?:\.\d\d)?)'
 
-
+betting_rounds = ["pre_flop", "flop", "turn", "river"]
 
 
 

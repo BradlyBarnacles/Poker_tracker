@@ -66,7 +66,7 @@ for file in os.listdir(in_path):
     f1 = os.path.join(in_path, file)
     f2 = os.path.join(out_path, file)
     
-    if update_only and (not ( os.path.exists(f2) ) or os.path.getmtime(f1) > os.path.getmtime(f2)):           ##if file is new or updated
+    if not update_only or (not ( os.path.exists(f2) ) or os.path.getmtime(f1) > os.path.getmtime(f2)):           ##if file is new or updated
         
         player_data = player_data[player_data.session != f2] ## remove pre-existing entries relating to this session
         new_data = {}

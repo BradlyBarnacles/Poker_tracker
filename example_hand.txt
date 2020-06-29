@@ -1,0 +1,43 @@
+PokerStars Hand #123456789012:  Hold'em No Limit ($0.01/$0.02 USD) - 2020/06/27 22:11:48 WET [2020/06/27 17:11:48 ET]
+Table 'cooltable' 6-max Seat #2 is the button
+Seat 1: alice ($1.91 in chips) 
+Seat 2: bob ($1.09 in chips) 
+Seat 3: cram ($1.98 in chips) 
+Seat 4: david ($2.45 in chips) 
+Seat 5: eve ($2 in chips) 
+Seat 6: fred ($1.46 in chips) 
+cram: posts small blind $0.01
+david: posts big blind $0.02
+*** HOLE CARDS ***
+Dealt to cram [9c 7s]
+eve: folds 
+fred: folds 
+alice: raises $0.02 to $0.04
+bob: folds 
+cram: folds 
+david: calls $0.02
+*** FLOP *** [Ks 3s 5d]
+david: checks 
+alice: bets $0.03
+david: calls $0.03
+*** TURN *** [Ks 3s 5d] [6h]
+david: checks 
+alice: checks 
+*** RIVER *** [Ks 3s 5d 6h] [Kh]
+david: bets $0.05
+alice: folds 
+Uncalled bet ($0.05) returned to david
+david collected $0.14 from pot
+david: doesn't show hand 
+*** SUMMARY ***
+Total pot $0.15 | Rake $0.01 
+Board [Ks 3s 5d 6h Kh]
+Seat 1: alice folded on the River
+Seat 2: bob (button) folded before Flop (didn't bet)
+Seat 3: cram (small blind) folded before Flop
+Seat 4: david (big blind) collected ($0.14)
+Seat 5: eve folded before Flop (didn't bet)
+Seat 6: fred folded before Flop (didn't bet)
+
+
+
