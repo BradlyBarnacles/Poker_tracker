@@ -7,6 +7,7 @@ import handhistory as HH
 import pandas as pd
 import numpy as np
 
+
 in_path = "C:/Users/Calum/AppData/Local/PokerStars.UK/HandHistory/dazzle0"
 out_path = "E:/Poker/hand_data"
 my_user = "dazzle0"
@@ -27,7 +28,8 @@ def round_seen(hand, player):
         stats["flops_seen"] = 1
     return stats
 
-## analytics is a list of functions, each of which return 1 or more statistics about a given player
+
+##list of functions, each of return 1 or more statistics about a given player
 analytics = [round_seen, player_winnings]
 
 
@@ -41,8 +43,10 @@ def update(player_data, new_stats):
     return
 
 
+update_only = False                 ##if true, script will only read new and updated files.
 
-## creates a pandas data_frame with existing player data if it exists, otherwise creates an empty data frame.
+
+
 try:
     player_data = pd.read_csv("player_data.csv")
 except:
@@ -55,26 +59,26 @@ try:
         earnings = json.loads(f.read())
 except:
     earnings = {}
+    
 
 for file in os.listdir(in_path):
     
     f1 = os.path.join(in_path, file)
     f2 = os.path.join(out_path, file)
     
-    if True: ## not ( os.path.exists(f2) ) or os.path.getmtime(f1) > os.path.getmtime(f2):           ##if file is new or updated
+    if update_only and (not ( os.path.exists(f2) ) or os.path.getmtime(f1) > os.path.getmtime(f2)):           ##if file is new or updated
         
         player_data = player_data[player_data.session != f2] ## remove pre-existing entries relating to this session
         new_data = {}
-        #new dict for stats data from this session
         earnings[f2] = [0]
         shutil.copy(f1, f2)
         for hand in HH.Parse_hands(f2):
-            for analytic in analytics:
-                
-                for player in hand["players"]:
-                    if player not in new_data.keys():
+            for player in hand["players"]:
+
+                if player not in new_data.keys():
                         new_data[player] = {"session": f2, "player": player}
-    
+                        
+                for analytic in analytics:
                     update(new_data[player], analytic(hand,player))
                         
                     net = hand["players"][my_user]['winnings'] - hand["players"][my_user]['into_pot']
@@ -83,8 +87,6 @@ for file in os.listdir(in_path):
         player_data = player_data.append(pd.DataFrame(new_data.values()), ignore_index = True)
 
 
-
-    
 
 player_data.to_csv("player_data.csv")
 with open("earnings.txt", "w") as f:
@@ -101,7 +103,3 @@ for session in earnings.values():
 plt.plot(cum_earnings)
 plt.show()        
                                         
-
-#x,y = zip(*players.values())
-#plt.scatter(x, y)
-#plt.show()
