@@ -39,7 +39,7 @@ def Parse_bet(line):
                   "raised_by": Decimal(sub_match.group(1))}
     return action
 
-def Parse_betting_round(file,contributions):
+def Parse_betting_round(file,contributions, players):
     line = file.readline()
     actions = []
     while re.match(limit_pattern, line) == None:
@@ -108,16 +108,16 @@ def Parse_hands(path):
                     contributions[match.group(1)] += Decimal(match.group(3))
                 line = file.readline()
             hand["my_cards"] = re.match(delt_pattern, file.readline()).group(1)
-
+            hand["betting_rounds"] = {}
+            
 
             for betting_round in betting_rounds:
-                hand[betting_round + "_action"], Done  = Parse_betting_round(file, contributions)
+                hand["betting_rounds"][betting_round], Done  = Parse_betting_round(file, contributions, hand["players"])
                 for player, amount in contributions.items():
                     hand["players"][player]["into_pot"] += amount
                     contributions[player] = 0
                 if Done == True:
-                    hand["players"][hand[betting_round + "_action"][-1]['player']]["winnings"]+= hand[betting_round+"_action"][-1]['amount']
-                    Parse_summary(hand, file)
+                    hand["players"][hand["betting_rounds"][betting_round][-1]['player']]["winnings"]+= hand["betting_rounds"][betting_round][-1]['amount']
                     break
             else:
                 line = file.readline()
@@ -146,8 +146,8 @@ def Parse_hands(path):
                         
                     
                     line = file.readline()
-                Parse_summary(hand, file) 
 
+            Parse_summary(hand, file)
             yield hand
 
 def Parse_summary(hand,file):
@@ -165,7 +165,7 @@ def Parse_summary(hand,file):
     return
     
 
-my_name = "dazzle0"
+my_name = ""
 
 money_pattern = '\$\d*(?:\.\d\d)?' ## regex pattern for dollar amounts in the form $x.yz or $x
 
